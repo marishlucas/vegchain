@@ -1,0 +1,20 @@
+{
+  "endpoints": {
+    "api": "grpcs://test-network-org0-orderersnode2-orderer.vegchain.tech:443",
+    "operations": "https://test-network-org0-orderersnode2-operations.vegchain.tech:443",
+    "grpcweb": "https://test-network-org0-orderersnode2-grpcweb.vegchain.tech:443",
+    "admin": "https://test-network-org0-orderersnode2-admin.vegchain.tech:443"
+  },
+  "tls": {
+    "signcerts": "",
+    "cacerts": [
+      ""
+    ]
+  },
+  "component": {
+    "signcerts": "",
+    "cacerts": [
+      ""
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "endpoints": {
+    "api": "https://test-network-org1-ca-ca.vegchain.tech:443",
+    "operations": "https://test-network-org1-ca-operations.vegchain.tech:443"
+  },
+  "tls": {
+    "cert": "=="
+  },
+  "ca": {
+    "signcerts": "=="
+  },
+  "tlsca": {
+    "signcerts": ""
+  }
+}

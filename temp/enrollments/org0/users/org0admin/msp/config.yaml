@@ -1,0 +1,14 @@
+NodeOUs:
+  Enable: true
+  ClientOUIdentifier:
+    Certificate: cacerts/test-network-org0-ca-ca-vegchain-tech-443.pem
+    OrganizationalUnitIdentifier: client
+  PeerOUIdentifier:
+    Certificate: cacerts/test-network-org0-ca-ca-vegchain-tech-443.pem
+    OrganizationalUnitIdentifier: peer
+  AdminOUIdentifier:
+    Certificate: cacerts/test-network-org0-ca-ca-vegchain-tech-443.pem
+    OrganizationalUnitIdentifier: admin
+  OrdererOUIdentifier:
+    Certificate: cacerts/test-network-org0-ca-ca-vegchain-tech-443.pem
+    OrganizationalUnitIdentifier: orderer
