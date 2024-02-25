@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import { Navbar } from "./ui/Navbar"
 import { MacbookScroll } from "./ui/Macbook-Hero"
 
@@ -6,7 +5,7 @@ export default function Home() {
   const navItems = [
     { name: 'Home', link: '/' },
     { name: 'Github', link: 'https://github.com/marishlucas/vegchain', newTab: true },
-    { name: 'H-Fabric', link: '/' },
+    { name: 'Blockchain', link: 'https://hyperledger-fabric.readthedocs.io/en/release-2.5/whatis.html', newTab: true },
   ]
   return (
     <div className="dark:bg-[#0B0B0F] h-fit dark:bg-black bg-white  dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative ">

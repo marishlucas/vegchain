@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function Dashboard({ user }) {
+
   const [assets, setAssets] = useState([]);
   const [sameOrgAssets1, setSameOrgAssets] = useState([]);
   const [differentOrgAssets1, setDifferentOrgAssets] = useState([]);
