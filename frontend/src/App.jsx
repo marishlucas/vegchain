@@ -1,18 +1,18 @@
-import './App.css'
 import Dashboard from './components/Dashboard'
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Login from './components/Login'
 import Layout from './components/Layout'
 import { useEffect, useState } from 'react'
 import Home from './components/Home'
 
-const Format = () => {
+
+const Format = ({ user }) => {
   return (
-    <>
+    user ? <>
       <Layout>
         <Outlet />
       </Layout>
-    </>
+    </> : <Navigate to="/" />
   )
 }
 
@@ -30,10 +30,6 @@ function App() {
     return JSON.parse(localStorage.getItem('user'))
   }
 
-  if (!user) {
-    return <Login user={user} setUser={setUser} />
-  }
-
   return (
     <>
       <Router>
@@ -41,7 +37,7 @@ function App() {
           <Route path="/" element={<Home />}>
           </Route>
           <Route path="login" element={<Login user={user} setUser={setUser} />}></Route>
-          <Route path="dashboard" element={<Format />}>
+          <Route path="dashboard" element={<Format user={user} />}>
             <Route path="" element={<Dashboard user={user} />}></Route>
           </Route>
         </Routes>

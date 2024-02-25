@@ -15,6 +15,7 @@ async function loginUser(credentials) {
 export default function Login({ user, setUser }) {
 
   let navigate = useNavigate()
+
   useEffect(() => {
     if (user) {
       navigate('/dashboard', { replace: true });
