@@ -4,8 +4,6 @@ import { Connection } from './connection';
 import { AssetRouter } from './assets.router';
 import dotenv from 'dotenv'
 
-const DBSOURCE = "usersdb.sqlite";
-
 var cors = require('cors');
 
 class App {

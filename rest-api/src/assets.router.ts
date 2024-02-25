@@ -9,7 +9,8 @@ import verifyToken from "./middleware";
 export class AssetRouter {
   public routes(app: any): void {
     app.route("/login")
-      .get(async (req: Request, res: Response) => {
+      .post(async (req: Request, res: Response) => {
+        console.log(req.body)
         const { User, Password } = req.body;
         if (!(User && Password)) {
           res.status(400).send("All input is required");
@@ -30,9 +31,10 @@ export class AssetRouter {
 
           const PHash = bcrypt.hashSync(Password, user[0].Salt);
           if (PHash !== user[0].Password) {
-            res.status(400).send("No Match");
+            res.status(400).send({ error: "Username or Password incorrect" });
             return;
           }
+
 
           // Generate and assign token
           const token = jwt.sign(
@@ -40,8 +42,15 @@ export class AssetRouter {
             process.env.TOKEN_KEY as string,
             { expiresIn: "2d" }
           );
+
+          const sanitizedUser = {
+            username: user[0].Username,
+            token: token,
+            organization: user[0].Organization
+          }
+
           user[0].Token = token;
-          res.status(200).send(user);
+          res.status(200).send(sanitizedUser);
         });
       });
 
@@ -93,16 +102,17 @@ export class AssetRouter {
         res.status(200).send(response);
       })
     app.route('/delete')
-      .post((req: Request, res: Response) => {
+      .post(async (req: Request, res: Response) => {
         console.log(req.body)
-        var response;
         try {
-          Connection.contract.submitTransaction('DeleteAsset', req.body.id);
-          response = ({ "status": 0, "message": "Delete success" })
+          Connection.contract.submitTransaction('DeleteAsset', req.body.ID);
+          const resultBytes = Connection.contract.evaluateTransaction('GetAllAssets');
+          const resultJson = utf8Decoder.decode(await resultBytes);
+          const result = JSON.parse(resultJson);
+          res.status(200).send(result);
         } catch (error) {
-          response = ({ "status": -1, "message": "Something went wrong" })
+          res.status(400).send(error);
         }
-        res.status(200).send(response);
       })
     app.route('/transfer')
       .post(async (req: Request, res: Response) => {
