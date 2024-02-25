@@ -2,8 +2,9 @@ import express from 'express';
 import * as bodyParser from 'body-parser';
 import { Connection } from './connection';
 import { AssetRouter } from './assets.router';
-import { apiKeyMiddleware } from './middleware';
 import dotenv from 'dotenv'
+
+const DBSOURCE = "usersdb.sqlite";
 
 var cors = require('cors');
 
@@ -14,7 +15,7 @@ class App {
     new Connection().init();
     this.app = express();
     this.app.use(cors());
-    this.app.use(apiKeyMiddleware);
+    // this.app.use(apiKeyMiddleware);
     this.config();
     this.routes.routes(this.app);
   }

@@ -1,19 +1,29 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-export const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const apiKey = req.headers['x-api-key'];
+export interface IGetUserAuthInfoRequest extends Request {
+  user?: string | object;
+}
 
-  if (!apiKey) {
-    res.status(400).send('Missing API Key');
-    return;
+require("dotenv").config();
+
+const verifyToken = (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+  const token =
+    req.body.token || req.query.token || req.headers["x-access-token"];
+
+  if (!token) {
+    return res.status(403).send("A token is required for authentication");
   }
 
-  if (apiKey !== process.env.API_KEY) {
-    console.log(apiKey, process.env.API_KEY);
-    // handle invalid API key
-    res.status(403).send('Invalid API Key');
-    return;
+  try {
+    const decoded: any = jwt.verify(token, process.env.TOKEN_KEY as string);
+    req.user = decoded;
+  } catch (err) {
+    return res.status(401).send("Invalid Token");
   }
 
-  next();
+  return next();
 };
+
+export default verifyToken;
+
