@@ -19,6 +19,11 @@ Aplicatia este alcatuita din mai multe parti:
 
 - Un director '/temp', care contine fisierul de configurare a retelei blockchain. Acesta defineste structura retelei, inclusiv participantii si regulile de consens.
 
+## App Showcase
+![productpage](photos/productpage.png)
+![dashboard](photos/dashboard.png)
+![peerlogs](photos/peerlogs.png)
+
 ## Ce probleme rezolvă?
 Supply-chain-ul de legume se confrunta cu numeroase provocari, cum ar fi lipsa de transparenta, riscul de fraudă si timpi de procesare lungi. Hyperledger Fabric ne ajută să rezolvăm aceste probleme în modul următor:
 
