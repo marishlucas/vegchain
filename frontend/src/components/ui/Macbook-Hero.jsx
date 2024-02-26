@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { cn } from "../../utils/cn";
 import {
   IconBrightnessDown,
@@ -24,6 +24,7 @@ import { IconCaretLeftFilled } from "@tabler/icons-react";
 import { IconCaretDownFilled } from "@tabler/icons-react";
 
 export const MacbookScroll = ({
+  changeNavbarColor,
   src,
   showGradient,
   title,
@@ -58,10 +59,30 @@ export const MacbookScroll = ({
   const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
+  const inView = useInView(ref)
+  const [firstLoad, setFirstLoad] = useState(true);
+
+  useEffect(() => {
+    // Only once the hero has left the viewport set firstLoad to false
+    if (firstLoad) {
+      setFirstLoad(false);
+      return;
+    } else if (!firstLoad) { // Any other scrolling won't be tunneled towards this condition, until the first scroll made the hero section out of view
+      if (!inView) {
+        console.log("is not view")
+        changeNavbarColor(true);
+      }
+      else {
+        changeNavbarColor(false)
+        console.log("is view")
+      }
+    }
+  }, [inView]);
+
   return (
     <div
       ref={ref}
-      className="min-h-[200vh]  flex flex-col items-center py-0 md:py-80 justify-start flex-shrink-0 [perspective:800px] transform md:scale-100 scale-[0.55] sm:scale-75"
+      className="min-h-[120vh] sm:min-h-[150vh] lg:min-h-[200vh]  flex flex-col items-center py-0 md:py-80 justify-start flex-shrink-0 [perspective:800px] transform md:scale-100 scale-[0.55] sm:scale-75"
     >
       <motion.h2
         style={{
