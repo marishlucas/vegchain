@@ -1,5 +1,12 @@
-## Introducere
-Vegchain este o aplicatie conceputa pentru a rezolva problemele specifice din cadrul lanturilor de aprovizionare de legume, folosind caracteristicile unice ale tehnologiei blockchain, folosind Hyperledger Fabric, o platforma de blockchain open-source. 
+<p align="center">
+  <img src="photos/logo.png" alt="Logo" />
+</p>
+<p align="center">
+  Vegchain este o aplicatie conceputa pentru a rezolva problemele specifice din cadrul lanturilor de aprovizionare de legume, folosind caracteristicile unice ale tehnologiei blockchain, folosind Hyperledger Fabric, o platforma de blockchain open-source. 
+</p>
+
+&nbsp;
+
 
 ## Tehnologii folosite
 - Server : Cluster Kubernetes pentru conformarea cu principiul de decentralizare al proiectului
