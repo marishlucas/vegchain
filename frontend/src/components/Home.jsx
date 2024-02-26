@@ -7,6 +7,7 @@ import { ChartBarIcon, ClockIcon, AdjustmentsHorizontalIcon, FingerPrintIcon, Ma
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline'
 import Footer from "./ui/Footer";
+import { useState } from "react";
 
 const tiers = [
   {
@@ -48,44 +49,69 @@ function classNames(...classes) {
 
 function Contact() {
   return (
-    <div className="bg-white pb-24 sm:pb-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Our offices</h2>
+    <div className="bg-white py-24 sm:py-32">
+      <div className="mx-auto flex flex-col items-center max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto text-center max-w-2xl lg:mx-0">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Contact us</h2>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Varius facilisi mauris sed sit. Non sed et duis dui leo, vulputate id malesuada non. Cras aliquet purus dui
-            laoreet diam sed lacus, fames.
+            Do you have a team and want to try our product? We'd love to hear from you.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base leading-7 sm:grid-cols-2 sm:gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-4">
           <div>
-            <h3 className="border-l border-indigo-600 pl-6 font-semibold text-gray-900">Los Angeles</h3>
+            <h3 className="border-l border-emerald-600 pl-6 font-semibold text-gray-900">Los Angeles</h3>
             <address className="border-l border-gray-200 pl-6 pt-2 not-italic text-gray-600">
               <p>4556 Brendan Ferry</p>
               <p>Los Angeles, CA 90210</p>
             </address>
           </div>
           <div>
-            <h3 className="border-l border-indigo-600 pl-6 font-semibold text-gray-900">New York</h3>
+            <h3 className="border-l border-emerald-600 pl-6 font-semibold text-gray-900">New York</h3>
             <address className="border-l border-gray-200 pl-6 pt-2 not-italic text-gray-600">
               <p>886 Walter Street</p>
               <p>New York, NY 12345</p>
             </address>
           </div>
           <div>
-            <h3 className="border-l border-indigo-600 pl-6 font-semibold text-gray-900">Toronto</h3>
+            <h3 className="border-l border-emerald-600 pl-6 font-semibold text-gray-900">Toronto</h3>
             <address className="border-l border-gray-200 pl-6 pt-2 not-italic text-gray-600">
               <p>7363 Cynthia Pass</p>
               <p>Toronto, ON N3Y 4H8</p>
             </address>
           </div>
           <div>
-            <h3 className="border-l border-indigo-600 pl-6 font-semibold text-gray-900">London</h3>
+            <h3 className="border-l border-emerald-600 pl-6 font-semibold text-gray-900">London</h3>
             <address className="border-l border-gray-200 pl-6 pt-2 not-italic text-gray-600">
               <p>114 Cobble Lane</p>
               <p>London N1 2EF</p>
             </address>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function CTA() {
+  return (
+    <div className="bg-white pb-24 sm:pb-32">
+      <div className="bg-gradient-to-l from-green-300 to-emerald-400 xl:rounded-3xl mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:justify-between lg:px-32">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          Ready to dive in?
+          <br />
+          Start your free trial today.
+        </h2>
+        <div className="mt-10 flex items-center gap-x-6 lg:mt-0 lg:flex-shrink-0">
+          <a
+            href="#"
+            className="rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Contact us
+          </a>
+          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
+            Learn more <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
     </div>
@@ -113,8 +139,8 @@ function Pricing() {
         </p>
       </div>
       <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600">
-        Qui iusto aut est earum eos quae. Eligendi est at nam aliquid ad quo reprehenderit in aliquid fugiat dolorum
-        voluptatibus.
+        Empowering Farmers Every Step of the Way,
+        choose the Plan That Fits Your Farming Needs
       </p>
       <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-0 lg:max-w-4xl lg:grid-cols-2">
         {tiers.map((tier, tierIdx) => (
@@ -228,6 +254,7 @@ function Features() {
 
 
 export default function Home() {
+  const [navColor, changeNavbarColor] = useState(false);
   const words = `Vegchain is the next generation of supply-chain management. We are building a blockchain-based platform that can be used to manage and monitor supply chain operations.`;
 
   const navItems = [
@@ -272,9 +299,10 @@ export default function Home() {
     <>
       <div className="dark:bg-[#0B0B0F] h-fit dark:bg-black bg-white  dark:bg-grid-small-white/[0.2] bg-grid-small-black/[0.2] relative ">
         <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
-        <Navbar navItems={navItems} />
+        <Navbar navItems={navItems} navColor={navColor} />
         <div className="overflow-hidden w-full">
           <MacbookScroll
+            changeNavbarColor={changeNavbarColor}
             src={`/mock.png`}
             title={
               <span className="">VEGCHAIN</span>
@@ -284,10 +312,12 @@ export default function Home() {
         </div>
       </div>
       <div className="bg-white border-t">
-        <TextGenerateEffect words={words} />;
+        <TextGenerateEffect
+          words={words} />;
       </div>
       <div className="bg-white">
-        <InfiniteMovingCards items={testimonials}
+        <InfiniteMovingCards
+          items={testimonials}
           direction="right"
           speed="slow" />
       </div>
@@ -298,7 +328,7 @@ export default function Home() {
         <Pricing />
       </div>
       <div>
-        <Contact />
+        <CTA />
       </div>
       <div>
         <Footer />
