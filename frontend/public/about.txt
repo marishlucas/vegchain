@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Marhey
+- Font Author: Copyright 2022 The Marhey Project Authors (https://github.com/namelatype/Marhey)
+- Font Source: http://fonts.gstatic.com/s/marhey/v6/x3d8ck7Laq-T7wl7mqfVrEe9sDvtBSx3O2cXiGevOMw.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
