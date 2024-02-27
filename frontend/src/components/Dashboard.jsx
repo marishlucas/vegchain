@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { useNavigate } from "react-router-dom";
 
-export default function Dashboard({ user }) {
+export default function Dashboard({ user, setBatches }) {
 
-  const [assets, setAssets] = useState([]);
-  const [sameOrgAssets1, setSameOrgAssets] = useState([]);
-  const [differentOrgAssets1, setDifferentOrgAssets] = useState([]);
+  const [sameOrgAssets, setSameOrgAssets] = useState([]);
+  const [differentOrgAssets, setDifferentOrgAssets] = useState([]);
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const sameOrgAssets = [
+  const sameOrgAssets1 = [
     {
       ID: "batch1",
       Type: "Fruit",
@@ -65,7 +68,7 @@ export default function Dashboard({ user }) {
   ];
 
 
-  const differentOrgAssets = [
+  const differentOrgAssets1 = [
     {
       ID: "batch4",
       Type: "Fruit",
@@ -140,21 +143,30 @@ export default function Dashboard({ user }) {
 
         const data = await response.json();
 
-        setAssets(data);
         const userOrgAssets = data.filter(asset => {
+          //FIXME: user.owner = orgx si asset.Owner returneaza OrgxMSP ca asa are chef backendu
           const owner = JSON.parse(asset.Owner);
-          return owner.org === user.organization;
+          let parsedOwner = owner.org.charAt(0).toLowerCase() + owner.org.slice(1).replace("MSP", "");
+          return parsedOwner === user.organization;
         });
 
         const differentOrgAssets = data.filter(asset => {
           const owner = JSON.parse(asset.Owner);
-          return owner.org !== user.organization;
+          let parsedOwner = owner.org.charAt(0).toLowerCase() + owner.org.slice(1).replace("MSP", "");
+          return parsedOwner !== user.organization;
         });
+
+        // Order by harvest date
+        sameOrgAssets.sort((a, b) => new Date(a.HarvestDate) - new Date(b.HarvestDate));
+        differentOrgAssets.sort((a, b) => new Date(a.HarvestDate) - new Date(b.HarvestDate));
+
+        setBatches(userOrgAssets);
 
         setSameOrgAssets(userOrgAssets);
         setDifferentOrgAssets(differentOrgAssets);
 
       } catch (error) {
+        setError(`An error has occured: ${error.message}`);
         console.error('Error:', error.message);
       }
     }
@@ -162,22 +174,51 @@ export default function Dashboard({ user }) {
     getAssets();
   }, [user]);
 
+  async function transferAsset(id) {
+
+    let item = sameOrgAssets.find(item => item.ID === id);
+    setSameOrgAssets(sameOrgAssets.filter(orgAsset => orgAsset.ID !== id));
+
+    try {
+      const response = await fetch('http://localhost:8080/transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': user.token
+        },
+        body: JSON.stringify({ ID: id, newOwner: "org2user", newOwnerOrg: "Org2MSP" }),
+      });
+
+      if (!response.ok) {
+        console.log(response.json())
+        setError(response.message);
+        throw new Error('Failed to transfer asset');
+      }
+      const data = await response.json();
+      setMessage(data.message);
+      setDifferentOrgAssets(prevDifferentOrgAssets => [...prevDifferentOrgAssets, item]);
+    } catch (error) {
+      setError(error);
+      console.error('Error:', error);
+    }
+  }
+
+  const navigate = useNavigate();
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col space-y-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
-            <h1 className="text-base font-semibold leading-6 text-gray-900">Users</h1>
-            <p className="mt-2 text-sm text-gray-700">
-              A list of all the users in your account including their name, title, email and role.
-            </p>
+            <h1 className="text-xl font-semibold leading-6 text-gray-700">{user.username} - {user.organization}</h1>
           </div>
           <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <button
+              onClick={() => navigate('/dashboard/batch?mode=create')}
               type="button"
               className="block transition rounded-md bg-emerald-500 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
             >
-              Add user
+              Add batch
             </button>
           </div>
         </div>
@@ -232,6 +273,9 @@ export default function Dashboard({ user }) {
                     <th scope="col" className="relative py-3 pl-3 pr-4 sm:pr-0">
                       <span className="sr-only">Edit</span>
                     </th>
+                    <th scope="col" className="relative py-3 pl-3 pr-4 sm:pr-0">
+                      <span className="sr-only">Send to seller</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
@@ -255,10 +299,21 @@ export default function Dashboard({ user }) {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{asset.Location}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{asset.QualityRating}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{asset.Quantity}</td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                        <a href="#" className="text-emerald-500 hover:text-emerald-900">
+                      <td className="flex justify-end items-center space-x-4 relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                        <button onClick={() => navigate(`/dashboard/batch?mode=edit&id=${asset.ID}`)} className="text-emerald-500 hover:text-emerald-900">
                           Edit<span className="sr-only">, {asset.ID}</span>
-                        </a>
+                        </button>
+                        {
+                          user.organization == "org1" &&
+                          <button
+                            onClick={() => transferAsset(asset.ID)}
+                            type="button"
+                            title="Send to seller"
+                            className="rounded bg-white px-2 py-1 text-xs font-semibold text-emerald-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                          >
+                            Send
+                          </button>
+                        }
                       </td>
                     </tr>
                   ))}
@@ -268,7 +323,9 @@ export default function Dashboard({ user }) {
                       scope="colgroup"
                       className="bg-gray-50 py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
                     >
-                      Sold Assets
+                      {
+                        user.organization == "org1" ? "Sold Assets" : "Assets in tranzit"
+                      }
                     </th>
                   </tr>
                   {differentOrgAssets.map((asset) => (
@@ -283,17 +340,39 @@ export default function Dashboard({ user }) {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{asset.QualityRating}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{asset.Quantity}</td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                        <a href="#" className="text-emerald-500 hover:text-emerald-900">
-                          <span className="inline-flex items-center rounded-md bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
-                            Sold
-                          </span>
-                        </a>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </div>
+          <div className="-mx-4 sm:mx-0">
+            {
+              error &&
+              <div className="rounded-md bg-red-50 p-4 mt-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <CheckCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-red-800">{error}</p>
+                  </div>
+                  <div className="ml-auto pl-3">
+                    <div className="-mx-1.5 -my-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setError('')}
+                        className="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                      >
+                        <span className="sr-only">Dismiss</span>
+                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>

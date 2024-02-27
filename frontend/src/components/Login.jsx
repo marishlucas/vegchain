@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { useNavigate } from "react-router-dom";
 
 export default function Login({ user, setUser }) {
@@ -13,13 +14,12 @@ export default function Login({ user, setUser }) {
         body: JSON.stringify(credentials)
       });
 
+      const responseData = await response.json();
       if (!response.ok) {
-        const responseData = response.json();
-        throw new Error('Invalid credentials or server error');
+        throw new Error(responseData.error);
       }
 
-      const data = await response.json();
-      return data;
+      return responseData;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -104,6 +104,19 @@ export default function Login({ user, setUser }) {
               </div>
             </form>
           </div>
+
+
+          <div className="mt-4 bg-white shadow lg:rounded-lg bg-blue-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3 flex-1 md:flex md:justify-between">
+                <p className="text-sm text-blue-700">Due to the nature of a permissioned blockchain, users can only sign in by contacting an organization admin.</p>
+              </div>
+            </div>
+          </div>
+
 
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{' '}
