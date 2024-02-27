@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { useNavigate } from "react-router-dom";
+const { VITE_API_URL } = import.meta.env
 
 export default function Login({ user, setUser }) {
-
   async function loginUser(credentials) {
     try {
-      const response = await fetch('http://localhost:8080/login', {
+      const response = await fetch(`${VITE_API_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

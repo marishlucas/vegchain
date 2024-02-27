@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { useNavigate } from "react-router-dom";
+const { VITE_API_URL } = import.meta.env
 
 export default function Dashboard({ user, setBatches }) {
 
@@ -129,7 +130,7 @@ export default function Dashboard({ user, setBatches }) {
   useEffect(() => {
     async function getAssets() {
       try {
-        const response = await fetch('http://localhost:8080/list', {
+        const response = await fetch(`${VITE_API_URL}/list`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -180,7 +181,7 @@ export default function Dashboard({ user, setBatches }) {
     setSameOrgAssets(sameOrgAssets.filter(orgAsset => orgAsset.ID !== id));
 
     try {
-      const response = await fetch('http://localhost:8080/transfer', {
+      const response = await fetch(`${VITE_API_URL}/transfer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

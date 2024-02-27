@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom";
+const { API_URL } = import.meta.env
 
 export default function Batch({ user, batches }) {
-
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
@@ -25,7 +25,7 @@ export default function Batch({ user, batches }) {
 
   async function createAsset() {
     try {
-      const response = await fetch('http://localhost:8080/create', {
+      const response = await fetch(`${API_URL}/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export default function Batch({ user, batches }) {
   }
   async function updateAsset() {
     try {
-      const response = await fetch('http://localhost:8080/update', {
+      const response = await fetch(`${API_URL}/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
