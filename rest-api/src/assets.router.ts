@@ -6,6 +6,11 @@ import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import verifyToken from "./middleware";
 
+export interface IGetUserAuthInfoRequest extends Request {
+  user?: any;
+}
+
+
 export class AssetRouter {
   public routes(app: any): void {
     app.route("/login")
@@ -13,7 +18,7 @@ export class AssetRouter {
         console.log(req.body)
         const { User, Password } = req.body;
         if (!(User && Password)) {
-          res.status(400).send("All input is required");
+          res.status(400).json({ error: "All input is required" });
           return;
         }
 
@@ -31,14 +36,14 @@ export class AssetRouter {
 
           const PHash = bcrypt.hashSync(Password, user[0].Salt);
           if (PHash !== user[0].Password) {
-            res.status(400).send({ error: "Username or Password incorrect" });
+            res.status(400).json({ error: "Username or Password incorrect" });
             return;
           }
 
 
           // Generate and assign token
           const token = jwt.sign(
-            { user_id: user[0].Id, username: user[0].Username, User },
+            { user_id: user[0].Id, username: user[0].Username, organization: user[0].Organization, User },
             process.env.TOKEN_KEY as string,
             { expiresIn: "2d" }
           );
@@ -55,95 +60,198 @@ export class AssetRouter {
       });
 
     app.route('/list')
-      .get(verifyToken, async (req: Request, res: Response) => {
-        const resultBytes = Connection.contract.evaluateTransaction('GetAllAssets');
-        const resultJson = utf8Decoder.decode(await resultBytes);
-        const result = JSON.parse(resultJson);
-        res.status(200).send(result);
-      })
+      .get(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
+
+        let connection = new Connection(org, username);
+        try {
+          await connection.init();
+
+          const resultBytes = await connection.contract!.evaluateTransaction('GetAllAssets');
+          const resultJson = utf8Decoder.decode(resultBytes);
+
+          res.status(200).send(JSON.parse(resultJson));
+
+        } catch (error: any) {
+          res.status(500).send({ error: error.message });
+
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
+        }
+      });
+
     app.route('/create')
-      .post((req: Request, res: Response) => {
-        console.log(req.body)
-        var Id = Date.now();
-        var json = JSON.stringify({
-          ID: Id,
-          Type: req.body.Type,
-          Quantity: req.body.Quantity,
-          HarvestDate: req.body.HarvestDate,
-          Owner: req.body.Owner,
-          Location: req.body.Location,
-          ExpirationDate: req.body.ExpirationDate,
-          QualityRating: req.body.QualityRating,
-        })
-        Connection.contract.submitTransaction('CreateAsset', json);
-        var response = ({ "AssetId": Id })
-        res.status(200).send(response);
-      })
-    app.route('/update')
-      .post((req: Request, res: Response) => {
-        console.log(req.body)
+      .post(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
+
         var json = JSON.stringify({
           ID: req.body.ID,
           Type: req.body.Type,
-          Quantity: req.body.Quantity,
+          Quantity: Number(req.body.Quantity),
           HarvestDate: req.body.HarvestDate,
           Owner: req.body.Owner,
           Location: req.body.Location,
           ExpirationDate: req.body.ExpirationDate,
-          QualityRating: req.body.QualityRating,
+          QualityRating: Number(req.body.QualityRating),
         })
-        var response;
+        console.log(JSON.parse(json))
+        let connection = new Connection(org, username);
         try {
-          Connection.contract.submitTransaction('UpdateAsset', json);
-          response = ({ "status": 0, "message": "Update success" })
-        } catch (error) {
-          response = ({ "status": -1, "message": "Something went wrong" })
+          await connection.init();
+
+          const result = await connection.contract!.submitAsync('CreateAsset', {
+            arguments: [json]
+          });
+
+          const status = await result.getStatus();
+          if (!status.successful) {
+            throw new Error(`failed to commit transaction ${status.transactionId} with status code ${status.code}`);
+          }
+          res.status(200).send({ message: "Asset Created" });
+          console.log(status)
+
+        } catch (error: any) {
+          res.status(500).send({ message: error });
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
         }
-        res.status(200).send(response);
+      });
+
+    app.route('/update')
+      .post(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
+
+        var json = JSON.stringify({
+          ID: req.body.ID,
+          Type: req.body.Type,
+          Quantity: Number(req.body.Quantity),
+          HarvestDate: req.body.HarvestDate,
+          Owner: req.body.Owner,
+          Location: req.body.Location,
+          ExpirationDate: req.body.ExpirationDate,
+          QualityRating: Number(req.body.QualityRating),
+        })
+
+        let connection = new Connection(org, username);
+        try {
+          await connection.init();
+
+          const result = await connection.contract!.submitAsync('UpdateAsset', {
+            arguments: [json]
+          });
+
+          const status = await result.getStatus();
+          if (!status.successful) {
+            throw new Error(`failed to commit transaction ${status.transactionId} with status code ${status.code}`);
+          }
+          res.status(200).send({ message: "Asset Updated" });
+          console.log(status)
+
+
+        } catch (error: any) {
+          res.status(500).send({ error: error.details[0].message });
+
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
+        }
       })
     app.route('/delete')
-      .post(async (req: Request, res: Response) => {
-        console.log(req.body)
+      .post(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
+
+        let connection = new Connection(org, username);
         try {
-          Connection.contract.submitTransaction('DeleteAsset', req.body.ID);
-          const resultBytes = Connection.contract.evaluateTransaction('GetAllAssets');
-          const resultJson = utf8Decoder.decode(await resultBytes);
-          const result = JSON.parse(resultJson);
-          res.status(200).send(result);
-        } catch (error) {
-          res.status(400).send(error);
+          await connection.init();
+
+          const result = await connection.contract!.submitAsync('DeleteAsset', {
+            arguments: [req.body.ID],
+          });
+          const status = await result.getStatus();
+          if (!status.successful) {
+            throw new Error(`failed to commit transaction ${status.transactionId} with status code ${status.code}`);
+          }
+          res.status(200).send({ message: "Asset deleted successfully" });
+          console.log(status)
+
+        } catch (error: any) {
+          res.status(500).send({ error: error.details[0].message });
+
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
         }
       })
+
     app.route('/transfer')
-      .post(async (req: Request, res: Response) => {
-        console.log(req.body)
+      .post(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
 
-        console.log('\n--> Async Submit Transaction: TransferAsset, updates existing asset owner');
+        let connection = new Connection(org, username);
+        try {
+          await connection.init();
 
-        const commit = Connection.contract.submitAsync('TransferAsset', {
-          arguments: [req.body.assetId, 'Saptha'],
-        });
-        const oldOwner = utf8Decoder.decode((await commit).getResult());
+          console.log(req.body.ID, req.body.newOwner, req.body.newOwnerOrg)
+          const result = await connection.contract!.submitAsync('TransferAsset', {
+            arguments: [
+              req.body.ID, req.body.newOwner, req.body.newOwnerOrg
+            ]
+          }
+          );
 
-        console.log(`*** Successfully submitted transaction to transfer ownership from ${oldOwner} to Saptha`);
-        console.log('*** Waiting for transaction commit');
+          const status = await result.getStatus();
+          if (!status.successful) {
+            throw new Error(`failed to commit transaction ${status.transactionId} with status code ${status.code}`);
+          }
+          res.status(200).send({ message: "Asset deleted successfully" });
+          console.log(status)
 
-        const status = await (await commit).getStatus();
-        if (!status.successful) {
-          throw new Error(`Transaction ${status.transactionId} failed to commit with status code ${status.code}`);
+        } catch (error: any) {
+          res.status(500).send({ error: error.details[0].message });
+
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
         }
-        console.log('*** Transaction committed successfully');
-        res.status(200).send(status);
       })
     app.route('/get/:id')
-      .get(async (req: Request, res: Response) => {
+      .get(verifyToken, async (req: IGetUserAuthInfoRequest, res: Response) => {
+        const username = req.user.username;
+        const org = req.user.organization;
         let id = req.params.id;
+
         console.log('\n--> Evaluate Transaction: ReadAsset, function returns asset attributes');
-        const resultBytes = Connection.contract.evaluateTransaction('ReadAsset', id);
-        const resultJson = utf8Decoder.decode(await resultBytes);
-        const result = JSON.parse(resultJson);
-        console.log('*** Result:', result);
-        res.status(200).send(result);
+
+        let connection = new Connection(org, username);
+        try {
+          await connection.init();
+
+          const resultBytes = await connection.contract!.evaluateTransaction('ReadAsset', id);
+
+          const resultJson = utf8Decoder.decode(resultBytes);
+
+          res.status(200).send(JSON.parse(resultJson));
+
+        } catch (error: any) {
+          res.status(500).send({ error: error.details[0].message });
+
+        } finally {
+          if (connection) {
+            connection.close(); // Close connection after using it
+          }
+        }
       })
   }
 

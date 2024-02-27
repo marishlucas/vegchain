@@ -23,8 +23,8 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
         if (err) {
         } else {
           const insert = 'INSERT INTO Users (Username, Organization, Password, Salt) VALUES (?,?,?,?)'
-          db.run(insert, ["org1user", "Org1MSP", bcrypt.hashSync("test123", salt), salt])
-          db.run(insert, ["org2user", "Org2MSP", bcrypt.hashSync("test123", salt), salt])
+          db.run(insert, ["org1user", "org1", bcrypt.hashSync("test123", salt), salt])
+          db.run(insert, ["org2user", "org2", bcrypt.hashSync("test123", salt), salt])
         }
       });
   }
