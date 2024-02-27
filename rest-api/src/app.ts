@@ -10,7 +10,9 @@ class App {
   public routes: AssetRouter = new AssetRouter();
   constructor() {
     this.app = express();
-    this.app.use(cors());
+    this.app.use(cors({
+      origin: '*'
+    }));
     // this.app.use(apiKeyMiddleware);
     this.config();
     this.routes.routes(this.app);

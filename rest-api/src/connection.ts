@@ -11,7 +11,9 @@ function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const WORKSHOP_CRYPTO = envOrDefault('CRYPTO_PATH', path.resolve(__dirname, '..', '..', '..', 'fabric-samples', 'full-stack-asset-transfer-guide', 'infrastructure', 'sample-network', 'temp'));
+// const WORKSHOP_CRYPTO = envOrDefault(path.resolve(__dirname, 'CRYPTO_PATH'), path.resolve(__dirname, '..', '..', '..', 'fabric-samples', 'full-stack-asset-transfer-guide', 'infrastructure', 'sample-network', 'temp'));
+const WORKSHOP_CRYPTO = path.resolve(__dirname, '..', 'certs');
+//
 // const WORKSHOP_CRYPTO = //your workshop crypto path
 
 export class Connection {
